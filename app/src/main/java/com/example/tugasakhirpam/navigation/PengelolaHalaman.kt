@@ -17,8 +17,10 @@ import com.example.tugasakhirpam.ui.view.buku.DestinasiUpdate
 import com.example.tugasakhirpam.ui.view.buku.DetailView
 import com.example.tugasakhirpam.ui.view.buku.InsertViewScreen
 import com.example.tugasakhirpam.ui.view.buku.UpdateView
+import com.example.tugasakhirpam.ui.view.kategori.BukuByKategoriScreen
 import com.example.tugasakhirpam.ui.view.kategori.DestinasiDetailKategori
 import com.example.tugasakhirpam.ui.view.kategori.DestinasiHomeKategori
+import com.example.tugasakhirpam.ui.view.kategori.DestinasiHomeKategoriByBuku
 import com.example.tugasakhirpam.ui.view.kategori.DestinasiKategoriEntry
 import com.example.tugasakhirpam.ui.view.kategori.DestinasiUpdateKategori
 import com.example.tugasakhirpam.ui.view.kategori.DetailKategoriScreen
@@ -127,6 +129,14 @@ fun PengelolaHalaman(navController: NavHostController = rememberNavController())
                 id = id.toInt()
             )
         }
+
+        composable(
+            route = DestinasiHomeKategoriByBuku.route // "home_kategori"
+        ) {
+            BukuByKategoriScreen(
+            )
+        }
+
         composable(DestinasiKategoriEntry.route) {
             InsertKategoriScreen(
                 navigateBack = {
@@ -210,6 +220,13 @@ fun PengelolaHalaman(navController: NavHostController = rememberNavController())
                                 idKategori.toString()
                             )
                         )
+                    },
+                    onViewAllBuku = {
+                        navController.navigate(DestinasiHomeKategoriByBuku.route) {
+                            popUpTo(DestinasiHomeKategoriByBuku.route) {
+                                inclusive = true
+                            }
+                        }
                     },
                     id = id,
                     onDeleteClick = {

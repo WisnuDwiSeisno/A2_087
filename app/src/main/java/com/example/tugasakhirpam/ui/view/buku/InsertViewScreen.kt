@@ -10,8 +10,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,8 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,10 +43,13 @@ import com.example.tugasakhirpam.ui.customwidget.CostumeTopAppBar
 import com.example.tugasakhirpam.viewmodel.PenyediaViewModel
 import com.example.tugasakhirpam.viewmodel.buku.BukuUiEvent
 import com.example.tugasakhirpam.viewmodel.buku.DropdownItem
-import com.example.tugasakhirpam.viewmodel.buku.DropdownStatus
 import com.example.tugasakhirpam.viewmodel.buku.InsertUiState
 import com.example.tugasakhirpam.viewmodel.buku.InsertViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 object DestinasiEntry : DestinasiNavigasi {
     override val route = "buku_entry"
     override val titleRes = "Entry Buku"
@@ -125,6 +133,7 @@ fun EntryBody(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormInput(
     bukuUiEvent: BukuUiEvent,
@@ -138,6 +147,7 @@ fun FormInput(
     var expandedKategori by remember { mutableStateOf(false) }
     var expandedPenulis by remember { mutableStateOf(false) }
     var expandedPenerbit by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -166,12 +176,41 @@ fun FormInput(
         // Tanggal Terbit
         OutlinedTextField(
             value = bukuUiEvent.tanggal_terbit,
-            onValueChange = { onValueChange(bukuUiEvent.copy(tanggal_terbit = it)) },
+            onValueChange = {},
             label = { Text("Tanggal Terbit") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showDatePicker = true },
+            enabled = false, // Non-editable, hanya lewat DatePicker
+            singleLine = true,
+            trailingIcon = {
+                Icon(imageVector = Icons.Default.DateRange, contentDescription = "Select Date")
+            }
         )
+        if (showDatePicker) {
+            val datePickerState = rememberDatePickerState()
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showDatePicker = false
+                        val selectedDate = datePickerState.selectedDateMillis?.let { millis ->
+                            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(millis))
+                        } ?: ""
+                        onValueChange(bukuUiEvent.copy(tanggal_terbit = selectedDate))
+                    }) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("Cancel")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
+            }
+        }
 
         // Status Buku
         StatusDropdown(
