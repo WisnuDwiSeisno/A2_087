@@ -8,10 +8,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -34,6 +38,7 @@ import com.example.tugasakhirpam.ui.customwidget.CostumeTopAppBar
 import com.example.tugasakhirpam.viewmodel.PenyediaViewModel
 import com.example.tugasakhirpam.viewmodel.buku.BukuUiEvent
 import com.example.tugasakhirpam.viewmodel.buku.DropdownItem
+import com.example.tugasakhirpam.viewmodel.buku.DropdownStatus
 import com.example.tugasakhirpam.viewmodel.buku.InsertUiState
 import com.example.tugasakhirpam.viewmodel.buku.InsertViewModel
 import kotlinx.coroutines.launch
@@ -169,13 +174,13 @@ fun FormInput(
         )
 
         // Status Buku
-        OutlinedTextField(
-            value = bukuUiEvent.status_buku,
-            onValueChange = { onValueChange(bukuUiEvent.copy(status_buku = it)) },
-            label = { Text("Status Buku") },
+        StatusDropdown(
+            selectedStatus = bukuUiEvent.status_buku,
+            onStatusSelected = { selectedStatus ->
+                onValueChange(bukuUiEvent.copy(status_buku = selectedStatus))
+            },
             modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
+            enabled = true
         )
 
         // Dropdown for Kategori
@@ -251,3 +256,49 @@ fun SimpleDropdown(
         }
     }
 }
+
+@Composable
+fun StatusDropdown(
+    selectedStatus: String,
+    onStatusSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val statusOptions = listOf("Tersedia", "Habis", "Dipesan")
+
+    Box(modifier = modifier) {
+        OutlinedTextField(
+            value = selectedStatus,
+            onValueChange = {},
+            label = { Text("Status Buku") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { if (enabled) expanded = true },
+            readOnly = true, // Membuat input tidak bisa diketik langsung
+            enabled = enabled,
+            trailingIcon = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { if (enabled) expanded = !expanded }
+                )
+            }
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            statusOptions.forEach { status ->
+                DropdownMenuItem(
+                    text = { Text(status) },
+                    onClick = {
+                        onStatusSelected(status)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
