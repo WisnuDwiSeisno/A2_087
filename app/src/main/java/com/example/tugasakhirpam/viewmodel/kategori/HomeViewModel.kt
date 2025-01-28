@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tugasakhirpam.data.Kategori
 import com.example.tugasakhirpam.repository.KategoriRepository
+import com.example.tugasakhirpam.viewmodel.buku.BukuUiState
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -40,6 +41,19 @@ class HomeViewModel(private val kategoriRepository: KategoriRepository) : ViewMo
             try {
                 val kategoriList = kategoriRepository.getKategori()
                 _kategoriUiState.value = KategoriUiState.Success(kategoriList)
+            } catch (e: IOException) {
+                _kategoriUiState.value = KategoriUiState.Error("Network error, please try again.")
+            } catch (e: HttpException) {
+                _kategoriUiState.value = KategoriUiState.Error("Failed to load data.")
+            }
+        }
+    }
+
+    fun deleteKategori(id: Int) {
+        viewModelScope.launch {
+            try {
+                kategoriRepository.deleteKategori(id)
+                fetchKategoriList() // Refresh daftar buku
             } catch (e: IOException) {
                 _kategoriUiState.value = KategoriUiState.Error("Network error, please try again.")
             } catch (e: HttpException) {
